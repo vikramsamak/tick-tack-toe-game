@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 interface PlayerInfo {
-  name: string;
+  player: string;
   socketId: string;
 }
 
@@ -12,7 +12,7 @@ interface IRoom extends Document {
 }
 
 const PlayerSchema: Schema = new Schema({
-  name: { type: String, required: true },
+  player: { type: String, required: true },
   socketId: { type: String, required: true },
 });
 

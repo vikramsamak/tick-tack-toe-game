@@ -14,7 +14,6 @@ function TickTackToeGrid() {
     opponentMoves,
     gameRoomId,
     setCurrentPlayer,
-    playerName,
   } = useGameStore();
 
   const { socket } = useSocketStore();
@@ -33,7 +32,7 @@ function TickTackToeGrid() {
       socket.emit("playerMove", {
         roomId: gameRoomId,
         index,
-        player: playerName,
+        player: currentPlayer,
       });
     }
   };
@@ -44,13 +43,13 @@ function TickTackToeGrid() {
         const { player, index } = moveData;
         console.log(player, index);
 
-        // if (grid[index] === null) {
-        //   const newGrid = [...grid];
-        //   newGrid[index] = player;
-        //   setGrid(newGrid);
+        if (grid[index] === null) {
+          const newGrid = [...grid];
+          newGrid[index] = player;
+          setGrid(newGrid);
 
-        //   setOpponentMoves([...opponentMoves, index]);
-        // }
+          setOpponentMoves([...opponentMoves, index]);
+        }
       };
 
       socket.on("move_made", handleMoveMade);

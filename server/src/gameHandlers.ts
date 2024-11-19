@@ -4,7 +4,7 @@ import Room from "./models/room";
 export async function handleGameConnections(socket: Socket, io: Server) {
   // Join a game room
   socket.on("join_game", async (data) => {
-    const { roomId, playerName } = data;
+    const { roomId, player } = data;
     const playerSocketId = socket.id; // Player's socket ID
 
     try {
@@ -14,18 +14,18 @@ export async function handleGameConnections(socket: Socket, io: Server) {
         // Create a new room and assign player A
         room = new Room({
           roomId,
-          playerA: { name: playerName, socketId: playerSocketId },
+          playerA: { player: player, socketId: playerSocketId },
         });
         await room.save();
         console.log(
-          `Player A (${playerName}, ${playerSocketId}) joined room ${roomId}`
+          `Player A (${player}, ${playerSocketId}) joined room ${roomId}`
         );
       } else if (!room.playerB) {
         // Assign player B
-        room.playerB = { name: playerName, socketId: playerSocketId };
+        room.playerB = { player: player, socketId: playerSocketId };
         await room.save();
         console.log(
-          `Player B (${playerName}, ${playerSocketId}) joined room ${roomId}`
+          `Player B (${player}, ${playerSocketId}) joined room ${roomId}`
         );
       } else {
         socket.emit("room_full", { message: "Room is already full" });
@@ -36,7 +36,7 @@ export async function handleGameConnections(socket: Socket, io: Server) {
       socket.join(roomId);
       io.to(roomId).emit("player_joined", {
         playerId: playerSocketId,
-        playerName,
+        player,
       });
     } catch (error) {
       console.error("Error joining game:", error);
@@ -51,13 +51,9 @@ export async function handleGameConnections(socket: Socket, io: Server) {
     try {
       const room = await Room.findOne({ roomId });
 
-
-
       if (room) {
         const opponent =
-          room.playerA?.name === player ? room.playerB : room.playerA;
-
-          console.log(opponent);
+          room.playerA?.player === player ? room.playerB : room.playerA;
 
         if (opponent) {
           io.to(opponent.socketId).emit("move_made", { player, index });

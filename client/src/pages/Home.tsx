@@ -22,7 +22,7 @@ function Home() {
       if (socket) {
         socket.emit("join_game", {
           roomId: gameRoomId,
-          playerName: playerName,
+          player: currentPlayer,
         });
       }
       setGameStatus("playing");
