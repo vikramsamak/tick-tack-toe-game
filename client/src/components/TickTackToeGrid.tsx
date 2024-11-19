@@ -14,26 +14,32 @@ function TickTackToeGrid() {
     opponentMoves,
     gameRoomId,
     setCurrentPlayer,
+    isOpponentTurn,
+    setOpponentTurn,
   } = useGameStore();
 
   const { socket } = useSocketStore();
 
   const handleClick = (index: number) => {
-    if (grid[index] !== null) return;
+    if (!isOpponentTurn) {
+      if (grid[index] !== null) return;
 
-    const newGrid = [...grid];
-    newGrid[index] = currentPlayer;
+      const newGrid = [...grid];
 
-    setGrid(newGrid);
+      newGrid[index] = currentPlayer;
 
-    setPlayerMoves([...playerMoves, index]);
+      setGrid(newGrid);
 
-    if (socket) {
-      socket.emit("playerMove", {
-        roomId: gameRoomId,
-        index,
-        player: currentPlayer,
-      });
+      setPlayerMoves([...playerMoves, index]);
+
+      if (socket) {
+        socket.emit("playerMove", {
+          roomId: gameRoomId,
+          index,
+          player: currentPlayer,
+        });
+      }
+      setOpponentTurn(true);
     }
   };
 
@@ -41,15 +47,18 @@ function TickTackToeGrid() {
     if (socket) {
       const handleMoveMade = (moveData: { player: string; index: number }) => {
         const { player, index } = moveData;
-        console.log(player, index);
 
         if (grid[index] === null) {
           const newGrid = [...grid];
+
           newGrid[index] = player;
+
           setGrid(newGrid);
 
           setOpponentMoves([...opponentMoves, index]);
         }
+
+        setOpponentTurn(false);
       };
 
       socket.on("move_made", handleMoveMade);
@@ -70,20 +79,28 @@ function TickTackToeGrid() {
   ]);
 
   return (
-    <div className="grid grid-cols-3 gap-2 p-4 bg-gray-800 rounded-lg shadow-lg">
-      {grid.map((cell, index) => (
-        <div
-          key={index}
-          className="flex items-center justify-center w-20 h-20 border border-gray-600 rounded-lg cursor-pointer transition-transform transform hover:scale-105 bg-gray-700 hover:bg-gray-600"
-          onClick={() => handleClick(index)}
-        >
-          {cell === "X" ? (
-            <X className="text-red-500 w-12 h-12" />
-          ) : cell === "O" ? (
-            <Circle className="text-blue-500 w-12 h-12" />
-          ) : null}
-        </div>
-      ))}
+    <div className="">
+      <div className="grid grid-cols-3 gap-2 p-4 bg-gray-800 rounded-lg shadow-lg">
+        {grid.map((cell, index) => (
+          <button
+            key={index}
+            disabled={isOpponentTurn}
+            className={`flex items-center justify-center w-20 h-20 border border-gray-600 rounded-lg cursor-pointer transition-transform transform hover:scale-105 bg-gray-700 hover:bg-gray-600 ${
+              isOpponentTurn && "opacity-50 cursor-not-allowed"
+            }`}
+            onClick={() => handleClick(index)}
+          >
+            {cell === "X" ? (
+              <X className="text-red-500 w-12 h-12" />
+            ) : cell === "O" ? (
+              <Circle className="text-blue-500 w-12 h-12" />
+            ) : null}
+          </button>
+        ))}
+      </div>
+      <div className="text-center py-4">
+        {isOpponentTurn ? "Opponent's Turn" : "Your Turn"}
+      </div>
     </div>
   );
 }

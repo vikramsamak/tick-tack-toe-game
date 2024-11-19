@@ -17,6 +17,8 @@ interface GameState {
   grid: (string | null)[];
   setGrid: (grid: (string | null)[]) => void;
   resetGame: () => void;
+  isOpponentTurn: boolean;
+  setOpponentTurn: (turn: boolean) => void;
 }
 
 const getStoredState = () => {
@@ -31,6 +33,7 @@ const getStoredState = () => {
         parsedState.gameRoomId !== undefined &&
         parsedState.gameStatus !== undefined &&
         parsedState.playerMoves !== undefined &&
+        parsedState.opponentMoves !== undefined &&
         parsedState.opponentMoves !== undefined &&
         parsedState.grid !== undefined
       ) {
@@ -48,6 +51,7 @@ const getStoredState = () => {
     playerMoves: [],
     opponentMoves: [],
     currentPlayer: "X",
+    isOpponentTurn: false,
     grid: Array(9).fill(null),
   };
 };
@@ -111,6 +115,14 @@ export const useGameStore = create<GameState>((set) => ({
     });
   },
 
+  setOpponentTurn: (turn) => {
+    set((state) => {
+      const newState = { ...state, isOpponentTurn: turn };
+      localStorage.setItem("gameState", JSON.stringify(newState));
+      return newState;
+    });
+  },
+
   resetGame: () => {
     set({
       playerName: "",
@@ -119,6 +131,7 @@ export const useGameStore = create<GameState>((set) => ({
       playerMoves: [],
       opponentMoves: [],
       currentPlayer: "X",
+      isOpponentTurn: false,
       grid: Array(9).fill(null),
     });
     localStorage.removeItem("gameState");
