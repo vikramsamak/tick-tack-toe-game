@@ -22,6 +22,17 @@ export async function handleGameConnections(socket: Socket, io: Server) {
         );
       } else if (!room.playerB) {
         // Assign player B
+
+        if (room.playerA?.player) {
+          if (room.playerA.player === player) {
+            // Notify the player to choose the opposite symbol (X or O)
+            socket.emit("choose_opposite_symbol", {
+              message: "Choose the opposite symbol.",
+            });
+            return;
+          }
+        }
+
         room.playerB = { player: player, socketId: playerSocketId };
         await room.save();
         console.log(
