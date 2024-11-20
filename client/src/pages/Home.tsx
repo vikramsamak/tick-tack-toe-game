@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useGameStore } from "../store/gameStore";
 import { useSocket } from "../hooks/useSocket";
 import { useEffect } from "react";
+import { useSocketStore } from "../store/socketStore";
 
 function Home() {
   const {
@@ -16,9 +17,19 @@ function Home() {
     setNotification,
   } = useGameStore();
 
-  const { socket } = useSocket();
+  const { connectSocket } = useSocket();
+
+  const { socket } = useSocketStore();
 
   const navigate = useNavigate();
+
+  const SOCKET_SERVER_URL = import.meta.env.VITE_SOCKET_SERVER_URL;
+
+  useEffect(() => {
+    if (!socket) {
+      connectSocket(SOCKET_SERVER_URL);
+    }
+  }, [socket, connectSocket]);
 
   const handleJoinGame = () => {
     if (playerName.trim()) {
@@ -38,7 +49,6 @@ function Home() {
     if (socket) {
       const handleSymbolConflict = (data: { isSameSymbol: boolean }) => {
         if (data.isSameSymbol) {
-          console.log(data);
           setGameStatus("waiting");
           setNotification({
             isError: true,
@@ -57,7 +67,7 @@ function Home() {
         socket.off("isSameSymbol", handleSymbolConflict);
       };
     }
-  }, [socket]);
+  }, [socket, setGameStatus, setNotification, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-4">
