@@ -6,45 +6,47 @@ export async function handleGameConnections(socket: Socket, io: Server) {
   socket.on("join_game", async (data) => {
     const { roomId, player } = data;
     const playerSocketId = socket.id; // Player's socket ID
-
+  
     try {
       let room = await Room.findOne({ roomId });
-
+  
       if (!room) {
-        // Create a new room and assign player A
+        // If room doesn't exist, create a new room and assign player A
         room = new Room({
           roomId,
-          playerA: { player: player, socketId: playerSocketId },
+          playerA: { player, socketId: playerSocketId },
         });
         await room.save();
         console.log(
-          `Player A (${player}, ${playerSocketId}) joined room ${roomId}`
+          `Player A (${player}, ${playerSocketId}) created and joined room ${roomId}`
         );
       } else if (!room.playerB) {
-        // Assign player B
-
-        if (room.playerA?.player) {
-          if (room.playerA.player === player) {
-            // Notify the player to choose the opposite symbol (X or O)
-            socket.emit("choose_opposite_symbol", {
-              message: "Choose the opposite symbol.",
-            });
-            return;
-          }
+        // If room exists and player B slot is empty
+        if (room.playerA?.player === player) {
+          // Notify the player to choose a different symbol
+          socket.emit("isSameSymbol", { isSameSymbol: true });
+          return;
         }
-
-        room.playerB = { player: player, socketId: playerSocketId };
+  
+        // Assign player B
+        room.playerB = { player, socketId: playerSocketId };
         await room.save();
         console.log(
           `Player B (${player}, ${playerSocketId}) joined room ${roomId}`
         );
       } else {
+        // Room is full
         socket.emit("room_full", { message: "Room is already full" });
         return;
       }
-
-      // Add the player to the room
+  
+      // Notify the player that the symbol is valid
+      socket.emit("isSameSymbol", { isSameSymbol: false });
+  
+      // Add the player to the socket room
       socket.join(roomId);
+  
+      // Notify all players in the room about the new player
       io.to(roomId).emit("player_joined", {
         playerId: playerSocketId,
         player,
@@ -54,6 +56,7 @@ export async function handleGameConnections(socket: Socket, io: Server) {
       socket.emit("error", { message: "Failed to join the game." });
     }
   });
+  
 
   // Handle player moves
   socket.on("playerMove", async (data) => {

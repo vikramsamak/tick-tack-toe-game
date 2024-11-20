@@ -19,6 +19,11 @@ interface GameState {
   resetGame: () => void;
   isOpponentTurn: boolean;
   setOpponentTurn: (turn: boolean) => void;
+  notification: { isError: boolean; notificationMsg: string };
+  setNotification: (notification: {
+    isError: boolean;
+    notificationMsg: string;
+  }) => void;
 }
 
 const getStoredState = () => {
@@ -35,6 +40,7 @@ const getStoredState = () => {
         parsedState.playerMoves !== undefined &&
         parsedState.opponentMoves !== undefined &&
         parsedState.opponentMoves !== undefined &&
+        parsedState.notification !== undefined &&
         parsedState.grid !== undefined
       ) {
         return parsedState;
@@ -53,6 +59,7 @@ const getStoredState = () => {
     currentPlayer: "X",
     isOpponentTurn: false,
     grid: Array(9).fill(null),
+    notification: { isError: false, notificationMsg: "" },
   };
 };
 
@@ -123,6 +130,14 @@ export const useGameStore = create<GameState>((set) => ({
     });
   },
 
+  setNotification: (notification) => {
+    set((state) => {
+      const newState = { ...state, notification: notification };
+      localStorage.setItem("gameState", JSON.stringify(newState));
+      return newState;
+    });
+  },
+
   resetGame: () => {
     set({
       playerName: "",
@@ -133,6 +148,7 @@ export const useGameStore = create<GameState>((set) => ({
       currentPlayer: "X",
       isOpponentTurn: false,
       grid: Array(9).fill(null),
+      notification: { isError: false, notificationMsg: "" },
     });
     localStorage.removeItem("gameState");
   },

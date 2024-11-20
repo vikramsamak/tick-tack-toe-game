@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useGameStore } from "../store/gameStore";
 import { useSocket } from "../hooks/useSocket";
+import { useEffect } from "react";
 
 function Home() {
   const {
@@ -11,6 +12,8 @@ function Home() {
     setCurrentPlayer,
     gameRoomId,
     setGameRoomId,
+    notification,
+    setNotification,
   } = useGameStore();
 
   const { socket } = useSocket();
@@ -25,12 +28,36 @@ function Home() {
           player: currentPlayer,
         });
       }
-      setGameStatus("playing");
-      navigate("/play");
+      setGameStatus("waiting");
     } else {
       alert("Please enter your name to join the game");
     }
   };
+
+  useEffect(() => {
+    if (socket) {
+      const handleSymbolConflict = (data: { isSameSymbol: boolean }) => {
+        if (data.isSameSymbol) {
+          console.log(data);
+          setGameStatus("waiting");
+          setNotification({
+            isError: true,
+            notificationMsg: "Please choose another symbol.",
+          });
+        } else {
+          setNotification({ isError: false, notificationMsg: "" });
+          setGameStatus("playing");
+          navigate("/play");
+        }
+      };
+
+      socket.on("isSameSymbol", handleSymbolConflict);
+
+      return () => {
+        socket.off("isSameSymbol", handleSymbolConflict);
+      };
+    }
+  }, [socket]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-4">
@@ -41,6 +68,13 @@ function Home() {
         <p className="text-center mb-6 text-gray-600">
           Enter your name to start playing!
         </p>
+
+        {notification.notificationMsg.length > 0 && (
+          <div className="alert alert-warning mb-4">
+            <span>{notification.notificationMsg}</span>
+          </div>
+        )}
+
         <label className="label label-text text-gray-800">Player name:</label>
         <input
           type="text"
