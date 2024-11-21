@@ -67,7 +67,9 @@ function GameLayout() {
     }
 
     if (grid.every((cell) => cell !== null)) {
-      setIsTie(true);
+      if (socket) {
+        socket.emit("check_tie", { roomId: gameRoomId, isTie: true });
+      }
     }
   };
 
@@ -93,6 +95,20 @@ function GameLayout() {
 
       return () => {
         socket.off("winner_announcement", handleWinnerAnnouncement);
+      };
+    }
+  }, [socket]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("game_tied", (data) => {
+        if (data.isTie) {
+          setIsTie(true);
+        }
+      });
+
+      return () => {
+        socket.off("game_tied");
       };
     }
   }, [socket]);

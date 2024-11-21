@@ -88,8 +88,12 @@ export async function handleGameConnections(socket: Socket, io: Server) {
 
   socket.on("game_winner", async (data) => {
     const { roomId, winner } = data;
-
     io.to(roomId).emit("winner_announcement", { winner });
+  });
+
+  socket.on("check_tie", async (data) => {
+    const { roomId, isTie } = data;
+    io.to(roomId).emit("game_tied", { isTie });
   });
 
   // Handle disconnect
