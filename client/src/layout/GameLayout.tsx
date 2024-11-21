@@ -1,14 +1,15 @@
 import { useNavigate } from "react-router-dom";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
-import TickTackToeGrid from "../components/TickTackToeGrid";
 import { useGameStore } from "../store/gameStore";
 import { useSocketStore } from "../store/socketStore";
+import Header from "../components/Header";
+import TickTackToeGrid from "../components/TickTackToeGrid";
+import Footer from "../components/Footer";
 
 function GameLayout() {
   const { resetGame } = useGameStore();
   const { disconnectSocket } = useSocketStore();
   const navigate = useNavigate();
+  
   return (
     <div className="min-h-screen flex flex-col w-full">
       <Header />

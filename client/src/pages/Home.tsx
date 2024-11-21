@@ -102,7 +102,7 @@ function Home() {
           onChange={(e) => setGameRoomId(e.target.value)}
         />
         <label className="label label-text text-gray-800">
-          Select your sign:
+          Select your symbol:
         </label>
         <select
           className="select select-bordered w-full mb-4 text-gray-200"
