@@ -15,6 +15,8 @@ function Home() {
     setGameRoomId,
     notification,
     setNotification,
+    setPlayerXName,
+    setPlayerOName,
   } = useGameStore();
 
   const { connectSocket } = useSocket();
@@ -38,6 +40,11 @@ function Home() {
           roomId: gameRoomId,
           player: currentPlayer,
         });
+      }
+      if (currentPlayer === "X") {
+        setPlayerXName(playerName);
+      } else {
+        setPlayerOName(playerName);
       }
       setGameStatus("waiting");
     } else {

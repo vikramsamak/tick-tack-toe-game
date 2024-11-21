@@ -6,10 +6,10 @@ export async function handleGameConnections(socket: Socket, io: Server) {
   socket.on("join_game", async (data) => {
     const { roomId, player } = data;
     const playerSocketId = socket.id; // Player's socket ID
-  
+
     try {
       let room = await Room.findOne({ roomId });
-  
+
       if (!room) {
         // If room doesn't exist, create a new room and assign player A
         room = new Room({
@@ -27,7 +27,7 @@ export async function handleGameConnections(socket: Socket, io: Server) {
           socket.emit("isSameSymbol", { isSameSymbol: true });
           return;
         }
-  
+
         // Assign player B
         room.playerB = { player, socketId: playerSocketId };
         await room.save();
@@ -39,13 +39,13 @@ export async function handleGameConnections(socket: Socket, io: Server) {
         socket.emit("room_full", { message: "Room is already full" });
         return;
       }
-  
+
       // Notify the player that the symbol is valid
       socket.emit("isSameSymbol", { isSameSymbol: false });
-  
+
       // Add the player to the socket room
       socket.join(roomId);
-  
+
       // Notify all players in the room about the new player
       io.to(roomId).emit("player_joined", {
         playerId: playerSocketId,
@@ -56,7 +56,6 @@ export async function handleGameConnections(socket: Socket, io: Server) {
       socket.emit("error", { message: "Failed to join the game." });
     }
   });
-  
 
   // Handle player moves
   socket.on("playerMove", async (data) => {
@@ -84,6 +83,12 @@ export async function handleGameConnections(socket: Socket, io: Server) {
       console.error("Error handling player move:", error);
       socket.emit("error", { message: "Failed to process the move." });
     }
+  });
+
+  socket.on("game_winner", async (data) => {
+    const { roomId, winner } = data;
+
+    io.to(roomId).emit("winner_announcement", { winner });
   });
 
   // Handle disconnect

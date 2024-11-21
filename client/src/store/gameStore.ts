@@ -24,6 +24,14 @@ interface GameState {
     isError: boolean;
     notificationMsg: string;
   }) => void;
+  winner: string | null;
+  setWinner: (winner: string | null) => void;
+  isTie: boolean;
+  setIsTie: (tie: boolean) => void;
+  playerXName: string;
+  setPlayerXName: (name: string) => void;
+  playerOName: string;
+  setPlayerOName: (name: string) => void;
 }
 
 const getStoredState = () => {
@@ -41,7 +49,11 @@ const getStoredState = () => {
         parsedState.opponentMoves !== undefined &&
         parsedState.opponentMoves !== undefined &&
         parsedState.notification !== undefined &&
-        parsedState.grid !== undefined
+        parsedState.grid !== undefined &&
+        parsedState.winner !== undefined &&
+        parsedState.isTie !== undefined &&
+        parsedState.playerXName !== undefined &&
+        parsedState.playerOName !== undefined
       ) {
         return parsedState;
       }
@@ -60,6 +72,10 @@ const getStoredState = () => {
     isOpponentTurn: false,
     grid: Array(9).fill(null),
     notification: { isError: false, notificationMsg: "" },
+    winner: null,
+    isTie: false,
+    playerXName: "",
+    playerOName: "",
   };
 };
 
@@ -138,6 +154,38 @@ export const useGameStore = create<GameState>((set) => ({
     });
   },
 
+  setWinner(winner) {
+    set((state) => {
+      const newState = { ...state, winner: winner };
+      localStorage.setItem("gameState", JSON.stringify(newState));
+      return newState;
+    });
+  },
+
+  setIsTie(tie) {
+    set((state) => {
+      const newState = { ...state, isTie: tie };
+      localStorage.setItem("gameState", JSON.stringify(newState));
+      return newState;
+    });
+  },
+
+  setPlayerOName: (name) => {
+    set((state) => {
+      const newState = { ...state, playerOName: name };
+      localStorage.setItem("gameState", JSON.stringify(newState));
+      return newState;
+    });
+  },
+
+  setPlayerXName: (name) => {
+    set((state) => {
+      const newState = { ...state, playerXName: name };
+      localStorage.setItem("gameState", JSON.stringify(newState));
+      return newState;
+    });
+  },
+
   resetGame: () => {
     set({
       playerName: "",
@@ -149,6 +197,10 @@ export const useGameStore = create<GameState>((set) => ({
       isOpponentTurn: false,
       grid: Array(9).fill(null),
       notification: { isError: false, notificationMsg: "" },
+      winner: null,
+      isTie: false,
+      playerXName: "",
+      playerOName: "",
     });
     localStorage.removeItem("gameState");
   },
