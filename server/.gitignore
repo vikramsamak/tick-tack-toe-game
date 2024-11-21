@@ -2,3 +2,5 @@ node_modules
 
 # All envs
 .env*
+
+dist
