@@ -58,6 +58,10 @@ function TickTackToeGrid() {
         if (grid[index] === null) {
           const newGrid = [...grid];
 
+          clickSound.play().catch((err) => {
+            console.error("Error playing audio:", err);
+          });
+
           newGrid[index] = player;
 
           setGrid(newGrid);

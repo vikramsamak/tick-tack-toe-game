@@ -32,6 +32,8 @@ interface GameState {
   setPlayerXName: (name: string) => void;
   playerOName: string;
   setPlayerOName: (name: string) => void;
+  isBothPlayerJoined: boolean;
+  setIsBothPlayerJoined: (isBothPlayerJoined: boolean) => void;
 }
 
 const getStoredState = () => {
@@ -53,7 +55,8 @@ const getStoredState = () => {
         parsedState.winner !== undefined &&
         parsedState.isTie !== undefined &&
         parsedState.playerXName !== undefined &&
-        parsedState.playerOName !== undefined
+        parsedState.playerOName !== undefined &&
+        parsedState.isBothPlayerJoined !== undefined
       ) {
         return parsedState;
       }
@@ -76,6 +79,7 @@ const getStoredState = () => {
     isTie: false,
     playerXName: "",
     playerOName: "",
+    isBothPlayerJoined: false,
   };
 };
 
@@ -186,6 +190,14 @@ export const useGameStore = create<GameState>((set) => ({
     });
   },
 
+  setIsBothPlayerJoined: (isBothPlayerJoined) => {
+    set((state) => {
+      const newState = { ...state, isBothPlayerJoined: isBothPlayerJoined };
+      localStorage.setItem("gameState", JSON.stringify(newState));
+      return newState;
+    });
+  },
+
   resetGame: () => {
     set({
       playerName: "",
@@ -201,6 +213,7 @@ export const useGameStore = create<GameState>((set) => ({
       isTie: false,
       playerXName: "",
       playerOName: "",
+      isBothPlayerJoined: false,
     });
     localStorage.removeItem("gameState");
   },

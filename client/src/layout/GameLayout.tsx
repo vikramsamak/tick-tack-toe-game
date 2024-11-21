@@ -7,6 +7,7 @@ import TickTackToeGrid from "../components/TickTackToeGrid";
 import Footer from "../components/Footer";
 import WinnerModal from "../components/WinnerModal";
 import TieModal from "../components/TieModal";
+import WaitingModal from "../components/WaitingModal";
 
 function GameLayout() {
   const {
@@ -19,6 +20,8 @@ function GameLayout() {
     playerOName,
     playerXName,
     gameRoomId,
+    isBothPlayerJoined,
+    setIsBothPlayerJoined,
   } = useGameStore();
 
   const { socket, disconnectSocket } = useSocketStore();
@@ -94,11 +97,24 @@ function GameLayout() {
     }
   }, [socket]);
 
+  useEffect(() => {
+    if (socket) {
+      socket.on("both_players_joined", (data) => {
+        console.log(data);
+        setIsBothPlayerJoined(true);
+      });
+
+      return () => {
+        socket.off("both_players_joined");
+      };
+    }
+  }, [socket]);
+
   return (
     <div className="min-h-screen flex flex-col w-full">
       <Header />
       <div className="flex flex-grow h-full justify-center items-center bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white">
-        <TickTackToeGrid />
+        {isBothPlayerJoined ? <TickTackToeGrid /> : <WaitingModal />}
       </div>
 
       <button

@@ -46,11 +46,12 @@ export async function handleGameConnections(socket: Socket, io: Server) {
       // Add the player to the socket room
       socket.join(roomId);
 
-      // Notify all players in the room about the new player
-      io.to(roomId).emit("player_joined", {
-        playerId: playerSocketId,
-        player,
-      });
+      if (room.playerA && room.playerB) {
+        console.log("Both players are in the room. Game starting!");
+        io.to(roomId).emit("both_players_joined", {
+          message: "Game has started! Player B has joined.",
+        });
+      }
     } catch (error) {
       console.error("Error joining game:", error);
       socket.emit("error", { message: "Failed to join the game." });
