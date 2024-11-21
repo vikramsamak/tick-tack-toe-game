@@ -2,6 +2,7 @@ import { X, Circle } from "lucide-react";
 import { useGameStore } from "../store/gameStore";
 import { useSocketStore } from "../store/socketStore";
 import { useEffect } from "react";
+import click from "../assets/audios/click.wav";
 
 function TickTackToeGrid() {
   const {
@@ -20,9 +21,15 @@ function TickTackToeGrid() {
 
   const { socket } = useSocketStore();
 
+  const clickSound = new Audio(click);
+
   const handleClick = (index: number) => {
     if (!isOpponentTurn) {
       if (grid[index] !== null) return;
+
+      clickSound.play().catch((err) => {
+        console.error("Error playing audio:", err);
+      });
 
       const newGrid = [...grid];
 
