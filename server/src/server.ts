@@ -20,6 +20,10 @@ export function startServer(port: number) {
   // Middleware
   app.use(express.json());
 
+  app.get("/", (req, res) => {
+    res.send("Tick tack toe socket server.");
+  });
+
   // Socket.IO connection handling
   io.on("connection", (socket) => {
     console.log(`User connected: ${socket.id}`);
