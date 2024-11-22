@@ -133,13 +133,6 @@ function GameLayout() {
         {isBothPlayerJoined ? <TickTackToeGrid /> : <WaitingModal />}
       </div>
 
-      <button
-        onClick={handleReset}
-        className="btn-square btn-primary text-white"
-      >
-        Reset
-      </button>
-
       {winner && <WinnerModal winner={winner} handleReset={handleReset} />}
 
       {isTie && <TieModal handleReset={handleReset} />}
