@@ -5,12 +5,15 @@ import { routes } from "./routes";
 import { SocketProvider } from "./contexts/SocketContext";
 import "./index.css";
 
-
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <SocketProvider>
-      <RouterProvider router={routes} />
+      <RouterProvider
+        router={routes}
+        future={{
+          v7_startTransition: true,
+        }}
+      />
     </SocketProvider>
   </StrictMode>
 );
