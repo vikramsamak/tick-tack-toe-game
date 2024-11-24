@@ -99,12 +99,62 @@ export async function handleGameConnections(socket: Socket, io: Server) {
 
   socket.on("game_winner", async (data) => {
     const { roomId, winner } = data;
-    io.to(roomId).emit("winner_announcement", { winner });
+
+    try {
+      const room = await Room.findOne({ roomId });
+
+      if (room?.playerA?.socketId) {
+        io.to(room.playerA.socketId).emit("winner_announcement", { winner });
+      }
+
+      if (room?.playerB?.socketId) {
+        io.to(room.playerB.socketId).emit("winner_announcement", { winner });
+      }
+
+      console.log(`Winner announcement sent to room ${roomId}: ${winner}`);
+    } catch (error) {
+      console.error("Error sending winner announcement:", error);
+    }
   });
 
   socket.on("check_tie", async (data) => {
     const { roomId, isTie } = data;
-    io.to(roomId).emit("game_tied", { isTie });
+
+    try {
+      const room = await Room.findOne({ roomId });
+
+      if (room?.playerA?.socketId) {
+        io.to(room.playerA.socketId).emit("game_tied", { isTie });
+      }
+
+      if (room?.playerB?.socketId) {
+        io.to(room.playerB.socketId).emit("game_tied", { isTie });
+      }
+
+      console.log(`Game tie status sent to room ${roomId}: ${isTie}`);
+    } catch (error) {
+      console.error("Error sending game tie status:", error);
+    }
+  });
+
+  socket.on("check_tie", async (data) => {
+    const { roomId, isTie } = data;
+  
+    try {
+      const room = await Room.findOne({ roomId });
+  
+      if (room?.playerA?.socketId) {
+        io.to(room.playerA.socketId).emit("game_tied", { isTie });
+      }
+  
+      if (room?.playerB?.socketId) {
+        io.to(room.playerB.socketId).emit("game_tied", { isTie });
+      }
+  
+      console.log(`Game tie status sent to room ${roomId}: ${isTie}`);
+    } catch (error) {
+      console.error("Error sending game tie status:", error);
+    }
   });
 
   // Handle disconnect
