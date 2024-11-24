@@ -46,12 +46,20 @@ export async function handleGameConnections(socket: Socket, io: Server) {
       // Notify the player that the symbol is valid
       socket.emit("isSameSymbol", { isSameSymbol: false });
 
-      // Check if both players are in the room and emit the event
-      const isBothPlayersJoined = room.playerA && room.playerB;
-
-      if (isBothPlayersJoined) {
+      if (room.playerA && room.playerB) {
         console.log("Both players are in the room. Game starting!");
-        io.in(roomId).emit("both_players_joined", {
+
+        // Emit events individually to ensure delivery to both players
+        const playerASocketId = room.playerA.socketId;
+        const playerBSocketId = room.playerB.socketId;
+
+        // Emit to Player A
+        io.to(playerASocketId).emit("both_players_joined", {
+          isBothPlayerJoined: true,
+        });
+
+        // Emit to Player B
+        io.to(playerBSocketId).emit("both_players_joined", {
           isBothPlayerJoined: true,
         });
       }
