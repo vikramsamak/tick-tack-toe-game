@@ -1,8 +1,9 @@
 import { X, Circle } from "lucide-react";
 import { useGameStore } from "../store/gameStore";
 import { useSocketStore } from "../store/socketStore";
-import { useEffect } from "react";
+import { useCallback } from "react";
 import click from "../assets/audios/click.wav";
+import useSocketEvent from "../hooks/useSocketEvent";
 
 function TickTackToeGrid() {
   const {
@@ -14,7 +15,6 @@ function TickTackToeGrid() {
     setOpponentMoves,
     opponentMoves,
     gameRoomId,
-    setCurrentPlayer,
     isOpponentTurn,
     setOpponentTurn,
   } = useGameStore();
@@ -50,44 +50,35 @@ function TickTackToeGrid() {
     }
   };
 
-  useEffect(() => {
-    if (socket) {
-      const handleMoveMade = (moveData: { player: string; index: number }) => {
-        const { player, index } = moveData;
+  const handleMoveMade = useCallback(
+    (moveData: { player: string; index: number }) => {
+      const { player, index } = moveData;
+      if (grid[index] === null) {
+        const newGrid = [...grid];
 
-        if (grid[index] === null) {
-          const newGrid = [...grid];
+        clickSound.play().catch((err) => {
+          console.error("Error playing audio:", err);
+        });
 
-          clickSound.play().catch((err) => {
-            console.error("Error playing audio:", err);
-          });
+        newGrid[index] = player;
 
-          newGrid[index] = player;
+        setGrid(newGrid);
 
-          setGrid(newGrid);
+        setOpponentMoves([...opponentMoves, index]);
+      }
+      setOpponentTurn(false);
+    },
+    [
+      grid,
+      playerMoves,
+      opponentMoves,
+      setGrid,
+      setPlayerMoves,
+      setOpponentMoves,
+    ]
+  );
 
-          setOpponentMoves([...opponentMoves, index]);
-        }
-
-        setOpponentTurn(false);
-      };
-
-      socket.on("move_made", handleMoveMade);
-
-      return () => {
-        socket.off("move_made", handleMoveMade);
-      };
-    }
-  }, [
-    socket,
-    grid,
-    playerMoves,
-    opponentMoves,
-    setGrid,
-    setPlayerMoves,
-    setOpponentMoves,
-    setCurrentPlayer,
-  ]);
+  useSocketEvent("move_made", handleMoveMade);
 
   return (
     <div className="">

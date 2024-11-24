@@ -49,7 +49,7 @@ export async function handleGameConnections(socket: Socket, io: Server) {
       if (room.playerA && room.playerB) {
         console.log("Both players are in the room. Game starting!");
         io.to(roomId).emit("both_players_joined", {
-          message: "Game has started! Player B has joined.",
+          isBothPlayerJoined: true,
         });
       }
     } catch (error) {

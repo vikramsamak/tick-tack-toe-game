@@ -1,13 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { useGameStore } from "../store/gameStore";
 import { useSocketStore } from "../store/socketStore";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import Header from "../components/Header";
 import TickTackToeGrid from "../components/TickTackToeGrid";
 import Footer from "../components/Footer";
 import WinnerModal from "../components/WinnerModal";
 import TieModal from "../components/TieModal";
 import WaitingModal from "../components/WaitingModal";
+import useSocketEvent from "../hooks/useSocketEvent";
 
 function GameLayout() {
   const {
@@ -76,8 +77,6 @@ function GameLayout() {
   const handleReset = () => {
     disconnectSocket();
     resetGame();
-    setWinner(null);
-    setIsTie(false);
     navigate("/");
   };
 
@@ -85,46 +84,43 @@ function GameLayout() {
     checkWinner();
   }, [grid]);
 
-  useEffect(() => {
-    if (socket) {
-      const handleWinnerAnnouncement = (data: { winner: string }) => {
-        setWinner(data.winner);
-      };
-
-      socket.on("winner_announcement", handleWinnerAnnouncement);
-
-      return () => {
-        socket.off("winner_announcement", handleWinnerAnnouncement);
-      };
+  const handleWinnerAnnouncement = useCallback((data: { winner: string }) => {
+    if (data.winner) {
+      setWinner(data.winner);
     }
-  }, [socket]);
+  }, []);
 
-  useEffect(() => {
-    if (socket) {
-      socket.on("game_tied", (data) => {
-        if (data.isTie) {
-          setIsTie(true);
-        }
-      });
+  useSocketEvent("winner_announcement", handleWinnerAnnouncement);
 
-      return () => {
-        socket.off("game_tied");
-      };
+  const handleGameTie = useCallback((data: { isTie: boolean }) => {
+    if (data.isTie) {
+      setIsTie(true);
     }
-  }, [socket]);
+  }, []);
 
-  useEffect(() => {
-    if (socket) {
-      socket.on("both_players_joined", (data) => {
-        console.log(data);
+  useSocketEvent("game_tied", handleGameTie);
+
+  const handleBothPlayersJoined = useCallback(
+    (data: { isBothPlayerJoined: boolean }) => {
+      if (data.isBothPlayerJoined) {
         setIsBothPlayerJoined(true);
-      });
+      }
+    },
+    []
+  );
 
-      return () => {
-        socket.off("both_players_joined");
-      };
-    }
-  }, [socket]);
+  useSocketEvent("both_players_joined", handleBothPlayersJoined);
+
+  const handleOpponentDisConnected = useCallback(
+    (data: { isOpponentDisconnected: boolean }) => {
+      if (data.isOpponentDisconnected) {
+        setIsBothPlayerJoined(false);
+      }
+    },
+    []
+  );
+
+  useSocketEvent("opponent_disconnected", handleOpponentDisConnected);
 
   return (
     <div className="min-h-screen flex flex-col w-full">
