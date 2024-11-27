@@ -8,10 +8,6 @@ interface GameState {
   gameStatus: "waiting" | "playing" | "finished";
   setGameStatus: (status: "waiting" | "playing" | "finished") => void;
   setPlayerScore: (score: number) => void;
-  playerMoves: number[];
-  setPlayerMoves: (moves: number[]) => void;
-  opponentMoves: number[];
-  setOpponentMoves: (moves: number[]) => void;
   currentPlayer: "X" | "O";
   setCurrentPlayer: (player: "X" | "O") => void;
   grid: (string | null)[];
@@ -47,9 +43,6 @@ const getStoredState = () => {
         parsedState.playerName !== undefined &&
         parsedState.gameRoomId !== undefined &&
         parsedState.gameStatus !== undefined &&
-        parsedState.playerMoves !== undefined &&
-        parsedState.opponentMoves !== undefined &&
-        parsedState.opponentMoves !== undefined &&
         parsedState.notification !== undefined &&
         parsedState.grid !== undefined &&
         parsedState.winner !== undefined &&
@@ -69,8 +62,6 @@ const getStoredState = () => {
     playerName: "",
     gameStatus: "waiting",
     gameRoomId: "",
-    playerMoves: [],
-    opponentMoves: [],
     currentPlayer: "X",
     isOpponentTurn: false,
     grid: Array(9).fill(null),
@@ -97,22 +88,6 @@ export const useGameStore = create<GameState>((set) => ({
   setGameStatus: (status) => {
     set((state) => {
       const newState = { ...state, gameStatus: status };
-      localStorage.setItem("gameState", JSON.stringify(newState));
-      return newState;
-    });
-  },
-
-  setPlayerMoves: (moves) => {
-    set((state) => {
-      const newState = { ...state, playerMoves: moves };
-      localStorage.setItem("gameState", JSON.stringify(newState));
-      return newState;
-    });
-  },
-
-  setOpponentMoves: (moves) => {
-    set((state) => {
-      const newState = { ...state, opponentMoves: moves };
       localStorage.setItem("gameState", JSON.stringify(newState));
       return newState;
     });
@@ -203,8 +178,6 @@ export const useGameStore = create<GameState>((set) => ({
       playerName: "",
       gameRoomId: "",
       gameStatus: "waiting",
-      playerMoves: [],
-      opponentMoves: [],
       currentPlayer: "X",
       isOpponentTurn: false,
       grid: Array(9).fill(null),

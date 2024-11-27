@@ -9,11 +9,7 @@ function TickTackToeGrid() {
   const {
     grid,
     setGrid,
-    playerMoves,
-    setPlayerMoves,
     currentPlayer,
-    setOpponentMoves,
-    opponentMoves,
     gameRoomId,
     isOpponentTurn,
     setOpponentTurn,
@@ -36,8 +32,6 @@ function TickTackToeGrid() {
       newGrid[index] = currentPlayer;
 
       setGrid(newGrid);
-
-      setPlayerMoves([...playerMoves, index]);
 
       if (socket) {
         socket.emit("playerMove", {
@@ -63,19 +57,10 @@ function TickTackToeGrid() {
         newGrid[index] = player;
 
         setGrid(newGrid);
-
-        setOpponentMoves([...opponentMoves, index]);
       }
       setOpponentTurn(false);
     },
-    [
-      grid,
-      playerMoves,
-      opponentMoves,
-      setGrid,
-      setPlayerMoves,
-      setOpponentMoves,
-    ]
+    [grid, setGrid]
   );
 
   useSocketEvent("move_made", handleMoveMade);
